@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HP Indigo – Validated Substrates</title>
+<style>
+  :root{
+    --bg:#f7f7f9; --card:#ffffff; --text:#1a1a1a; --muted:#5f6b7a; --line:#d9dee7; --thead:#f7f7f9; --hover:#f3f6fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,Arial}
+  header{padding:16px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:10}
+  h1{margin:0;font-size:18px;font-weight:700}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .grid{display:grid;gap:12px}
+  @media(min-width:900px){.grid{grid-template-columns:1fr 1fr 2fr}}
+  label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}
+  select,input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;color:#1a1a1a}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .pill{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;background:#fff;color:#2b3a55}
+  .group{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:12px 0;background:#fff}
+  .group summary{list-style:none;cursor:pointer;padding:12px 14px;background:var(--thead);border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .group summary::-webkit-details-marker{display:none}
+  .group-title{font-weight:700}
+  .table-wrap{border-top:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
+  thead th{position:sticky;top:0;background:var(--thead);color:#1f2a44;border-bottom:1px solid var(--line);padding:10px;text-align:left}
+  tbody td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:top}
+  tbody tr:hover{background:var(--hover)}
+  footer{color:var(--muted);padding:18px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>HP Indigo • Validated Substrates & Working Points</h1>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <label for="press">Platform (Press)</label>
+      <select id="press"></select>
+    </div>
+    <div class="card">
+      <label for="family">Family</label>
+      <select id="family"></select>
+    </div>
+    <div class="card">
+      <label for="substrate">Substrate</label>
+      <select id="substrate"></select>
+      <div style="margin-top:10px">
+        <label for="search">Quick filter (parameter/value)</label>
+        <input id="search" type="text" placeholder="e.g., Blanket, 600, yes, N/A..." />
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="row" id="metaRow"></div>
+
+    <!-- Advanced -->
+    <details class="group" open id="grp-advanced">
+      <summary><span class="group-title" id="title-adv">Advanced properties (Transfer Profile)</span></summary>
+      <div class="table-wrap">
+        <table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
+        <tbody id="tbody-adv"></tbody></table>
+      </div>
+    </details>
+
+    <!-- WHS -->
+    <details class="group" open id="grp-whs">
+      <summary><span class="group-title" id="title-whs">Tensions — WHS (Web Handling System)</span></summary>
+      <div class="table-wrap">
+        <table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
+        <tbody id="tbody-whs"></tbody></table>
+      </div>
+    </details>
+
+    <!-- Priming -->
+    <details class="group" open id="grp-priming">
+      <summary><span class="group-title" id="title-pri">Priming System Profile</span></summary>
+      <div class="table-wrap">
+        <table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
+        <tbody id="tbody-pri"></tbody></table>
+      </div>
+    </details>
+  </div>
+</div>
+
+<footer class="wrap small">
+  Quick reference UI (does not replace official HP Indigo documentation).
+</footer>
+
+<script>
+/* ===================== SCHEMAS (names & order) ===================== */
+const SCHEMA = {
+  "20000/25K": {
+    titles: {
+      advanced: "Advanced properties (Transfer Profile)",
+      whs: "Tensions — WHS (Web Handling System)",
+      priming: "Priming System Profile"
+    },
+    advanced: ["Second Transfer force","Blanket temp.*","IDS temp."],
+    whs: ["Rewinder input tension","Rewinder low tension","Rewinder tapper","Lay-on roller force","Printing engine tension","Active 3-zone tensions","Nip pressure","Unwinder buffer tension","Unwinder tension"],
+    priming: ["Anilox","Corona (at max. speed)","Dryer temp. Production","Dryer temp. READY","Input Fan Production","Input Fan READY","Exhaust fan Production","Exhaust fan READY"]
+  },
+  "200K": {
+    titles: {
+      advanced: "Advanced properties (Transfer Profile)",
+      whs: "Tensions — WHS (Web Handling System)",
+      priming: "Priming System Profile (PUW)"
+    },
+    advanced: ["Second Transfer force","Internal temp.","Blanket temp. (CMYKW) PW-110","IDS temp."],
+    whs: ["Rewinder input tension","Rewinder low tension","Rewinder tapper","Lay-on roller force","Printing engine tension","Active 3-zone tensions","Nip pressure","Unwinder buffer tension","Unwinder tension"],
+    priming: ["Anilox","Corona (at min. speed)","Corona (at max. speed)","Dryer temp. Production","Dryer temp. Ready","Input Fan Production","Input Fan Ready"]
+  }
+};
+
+/* ===================== DATASETS ===================== */
+/* ------- 20000/25K (page 4) ------- */
+const DATA_20000_25K = [
+  {press:"20000/25K",family:"Films",name:"PET 12um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"70",
+    "Rewinder input tension":"4","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"8","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"6","Unwinder tension":"6",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"70","Dryer temp. READY":"55",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Films",name:"Met-PET 12um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"70",
+    "Rewinder input tension":"4","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"8","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"6","Unwinder tension":"6",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"70","Dryer temp. READY":"55",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Films",name:"PE 70um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"70",
+    "Rewinder input tension":"4","Rewinder low tension":"1-2","Rewinder tapper":"50-70","Lay-on roller force":"N/A",
+    "Printing engine tension":"6-8","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"4-6","Unwinder tension":"4-6",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60-70","Dryer temp. READY":"50-55",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Films",name:"OPA 15um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60",
+    "Rewinder input tension":"4","Rewinder low tension":"2","Rewinder tapper":"50-70","Lay-on roller force":"N/A",
+    "Printing engine tension":"7","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"5","Unwinder tension":"5",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"60-70","Dryer temp. READY":"45-55",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Films",name:"BOPP 20um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60-70",
+    "Rewinder input tension":"4","Rewinder low tension":"1-2","Rewinder tapper":"50-70","Lay-on roller force":"N/A",
+    "Printing engine tension":"6-8","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"4-6","Unwinder tension":"4-6",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"50-70","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Films",name:"Met-BOPP 20um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60-70",
+    "Rewinder input tension":"4","Rewinder low tension":"1-2","Rewinder tapper":"50-70","Lay-on roller force":"N/A",
+    "Printing engine tension":"6-8","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"4-6","Unwinder tension":"4-6",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"50-70","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Films",name:"BOPP 40um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"70",
+    "Rewinder input tension":"4-6","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"8-10","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"6-8","Unwinder tension":"6-8",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  /* BOPP 40um Pearl (values aligned to BOPP 40um;) */
+  {press:"20000/25K",family:"Films",name:"BOPP 40um Pearl",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"70",
+    "Rewinder input tension":"4-6","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"8-10","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"6-8","Unwinder tension":"6-8",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+
+  /* Shrink sleeves */
+  {press:"20000/25K",family:"Shrink sleeves",name:"OPS 45",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"105","IDS temp.":"-",
+    "Rewinder input tension":"5-7","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"7-10","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"5-7","Unwinder tension":"5-7",
+    "Anilox":"2.5","Corona (at max. speed)":"1400","Dryer temp. Production":"50-60","Dryer temp. READY":"40",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"30-40","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Shrink sleeves",name:"PETG 45",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"105","IDS temp.":"-",
+    "Rewinder input tension":"5-7","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"7-10","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"5-7","Unwinder tension":"5-7",
+    "Anilox":"2.5","Corona (at max. speed)":"1400","Dryer temp. Production":"50-60","Dryer temp. READY":"40",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"30-40","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Shrink sleeves",name:"PVC 45",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"105","IDS temp.":"-",
+    "Rewinder input tension":"5-7","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"2",
+    "Printing engine tension":"7-10","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"5-7","Unwinder tension":"5-7",
+    "Anilox":"2.5","Corona (at max. speed)":"1400","Dryer temp. Production":"50-60","Dryer temp. READY":"40",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"30-40","Exhaust fan READY":"20-30"
+  }},
+
+  /* Pre-laminates */
+  {press:"20000/25K",family:"Pre-laminates",name:"PET/ALU/PE",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60",
+    "Rewinder input tension":"5-8","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"4",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Pre-laminates",name:"PET/PE",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60",
+    "Rewinder input tension":"5-8","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"4",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Pre-laminates",name:"OPA/PE",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60",
+    "Rewinder input tension":"4-6","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"4",
+    "Printing engine tension":"8-11","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"6-8","Unwinder tension":"6-8",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Pre-laminates",name:"MetPET/PE",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"60",
+    "Rewinder input tension":"6-8","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"4",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"2.5","Corona (at max. speed)":"1200","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+
+  /* Paper  */
+  {press:"20000/25K",family:"Paper",name:"Uncoated up to 99um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"8-10","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"3.36","Corona (at max. speed)":"OFF","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Paper",name:"Coated up to 99um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"8-10","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"2.5","Corona (at max. speed)":"600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Paper",name:"240um uncoated",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"12-14","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"14-16","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"12-14","Unwinder tension":"12-14",
+    "Anilox":"2.5","Corona (at max. speed)":"OFF","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+
+  /* Labels */
+  {press:"20000/25K",family:"Labels",name:"Paper 90um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"8-10","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"2.5","Corona (at max. speed)":"OFF","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Labels",name:"PE 120um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"6-8","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"8-10","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"6-8","Unwinder tension":"6-8",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Labels",name:"PP 120um",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"8-10","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"2.5","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }},
+  {press:"20000/25K",family:"Labels",name:"Wine label",params:{
+    "Second Transfer force":"450-600","Blanket temp.*":"110","IDS temp.":"-",
+    "Rewinder input tension":"8-10","Rewinder low tension":"N/A","Rewinder tapper":"35","Lay-on roller force":"N/A",
+    "Printing engine tension":"10-12","Active 3-zone tensions":"no","Nip pressure":"2","Unwinder buffer tension":"8-10","Unwinder tension":"8-10",
+    "Anilox":"3.36","Corona (at max. speed)":"1400","Dryer temp. Production":"70","Dryer temp. READY":"45",
+    "Input Fan Production":"70-80","Input Fan READY":"40","Exhaust fan Production":"20-30","Exhaust fan READY":"20-30"
+  }}
+];
+
+/* ------- 200K ------- */
+const DATA_200K = [
+  {press:"200K",family:"Films",name:"PET 12um",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"6","Rewinder low tension":"3 (optional)","Rewinder tapper":"20","Lay-on roller force":"yes",
+    "Printing engine tension":"6","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"6","Unwinder tension":"6",
+    "Anilox":"2.5","Corona (at min. speed)":"1000","Corona (at max. speed)":"1500","Dryer temp. Production":"60","Dryer temp. Ready":"45",
+    "Input Fan Production":"80","Input Fan Ready":"40"
+  }},
+  {press:"200K",family:"Films",name:"BOPP 20um",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"4","Rewinder low tension":"no","Rewinder tapper":"50","Lay-on roller force":"Not recommended",
+    "Printing engine tension":"8","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"6","Unwinder tension":"6",
+    "Anilox":"2.5","Corona (at min. speed)":"1000","Corona (at max. speed)":"1500","Dryer temp. Production":"65","Dryer temp. Ready":"45",
+    "Input Fan Production":"50","Input Fan Ready":"40"
+  }},
+  {press:"200K",family:"Films",name:"BOPP 40um",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"4","Rewinder low tension":"no","Rewinder tapper":"80","Lay-on roller force":"Not recommended",
+    "Printing engine tension":"8","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"6","Unwinder tension":"6",
+    "Anilox":"2.5","Corona (at min. speed)":"1000","Corona (at max. speed)":"1500","Dryer temp. Production":"65","Dryer temp. Ready":"45",
+    "Input Fan Production":"50","Input Fan Ready":"40"
+  }},
+  {press:"200K",family:"Films",name:"BOPP 40um Pearl",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"8","Rewinder low tension":"no","Rewinder tapper":"20","Lay-on roller force":"Not recommended",
+    "Printing engine tension":"10","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"8","Unwinder tension":"8",
+    "Anilox":"2.5","Corona (at min. speed)":"1000","Corona (at max. speed)":"1500","Dryer temp. Production":"65","Dryer temp. Ready":"45",
+    "Input Fan Production":"50","Input Fan Ready":"40"
+  }},
+
+  /* Paper */
+  {press:"200K",family:"Paper",name:"Paper Coated up to 170um",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"110","IDS temp.":"N/A",
+    "Rewinder input tension":"5","Rewinder low tension":"2","Rewinder tapper":"30","Lay-on roller force":"yes",
+    "Printing engine tension":"8","Active 3-zone tensions":"no","Nip pressure":"3","Unwinder buffer tension":"4","Unwinder tension":"4",
+    "Anilox":"2.5","Corona (at min. speed)":"off","Corona (at max. speed)":"off","Dryer temp. Production":"60","Dryer temp. Ready":"45",
+    "Input Fan Production":"50","Input Fan Ready":"40"
+  }},
+
+  /* Film Sustainable */
+  {press:"200K",family:"Film Sustainable",name:"MDO-PE25 sustainable",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"110","IDS temp.":"N/A",
+    "Rewinder input tension":"5","Rewinder low tension":"2","Rewinder tapper":"30","Lay-on roller force":"N/A",
+    "Printing engine tension":"8","Active 3-zone tensions":"no","Nip pressure":"3","Unwinder buffer tension":"4","Unwinder tension":"4",
+    "Anilox":"2.5","Corona (at min. speed)":"800","Corona (at max. speed)":"800","Dryer temp. Production":"60","Dryer temp. Ready":"45",
+    "Input Fan Production":"75","Input Fan Ready":"40"
+  }},
+  {press:"200K",family:"Film Sustainable",name:"PP film",params:{
+    "Second Transfer force":"700","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"8","Rewinder low tension":"N/A","Rewinder tapper":"20","Lay-on roller force":"N/A",
+    "Printing engine tension":"10","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"8","Unwinder tension":"8",
+    "Anilox":"2.5","Corona (at min. speed)":"1000","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. Ready":"45",
+    "Input Fan Production":"75","Input Fan Ready":"40"
+  }},
+
+  /* Labels */
+  {press:"200K",family:"Labels",name:"Paper 90um",params:{
+    "Second Transfer force":"800","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"16","Rewinder low tension":"no","Rewinder tapper":"20","Lay-on roller force":"N/A",
+    "Printing engine tension":"16","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"14","Unwinder tension":"14",
+    "Anilox":"2.5","Corona (at min. speed)":"off","Corona (at max. speed)":"off","Dryer temp. Production":"60","Dryer temp. Ready":"45",
+    "Input Fan Production":"70","Input Fan Ready":"40"
+  }},
+  {press:"200K",family:"Labels",name:"PE 80mic",params:{
+    "Second Transfer force":"600","Internal temp.":"120","Blanket temp. (CMYKW) PW-110":"105","IDS temp.":"N/A",
+    "Rewinder input tension":"8","Rewinder low tension":"N/A","Rewinder tapper":"20","Lay-on roller force":"N/A",
+    "Printing engine tension":"10","Active 3-zone tensions":"no","Nip pressure":"4","Unwinder buffer tension":"10","Unwinder tension":"8",
+    "Anilox":"2.5","Corona (at min. speed)":"800","Corona (at max. speed)":"1600","Dryer temp. Production":"60","Dryer temp. Ready":"45",
+    "Input Fan Production":"70","Input Fan Ready":"40"
+  }}
+];
+
+/* Merge final */
+const DATASET = [...DATA_20000_25K, ...DATA_200K];
+
+/* ===================== UI logic ===================== */
+const $=s=>document.querySelector(s);
+const pressSel=$('#press'), famSel=$('#family'), subSel=$('#substrate');
+const searchInp=$('#search'), metaRow=$('#metaRow');
+const TB_ADV=$('#tbody-adv'), TB_WHS=$('#tbody-whs'), TB_PRI=$('#tbody-pri');
+const TITLE_ADV=$('#title-adv'), TITLE_WHS=$('#title-whs'), TITLE_PRI=$('#title-pri');
+
+function uniq(a){return[...new Set(a)]}
+function byPress(p){return DATASET.filter(d=>d.press===p)}
+function byPressFam(p,f){return DATASET.filter(d=>d.press===p&&d.family===f)}
+function current(){const p=pressSel.value,f=famSel.value,n=subSel.value;return DATASET.find(d=>d.press===p&&d.family===f&&d.name===n)}
+
+function init(){
+  uniq(DATASET.map(d=>d.press)).sort().forEach(p=>pressSel.add(new Option(p,p)));
+  pressSel.addEventListener('change', onPress);
+  famSel.addEventListener('change', onFamily);
+  subSel.addEventListener('change', renderAll);
+  searchInp.addEventListener('input', renderAll);
+  onPress(); // init
+}
+
+function onPress(){
+  const sc = SCHEMA[pressSel.value] || SCHEMA["20000/25K"];
+  TITLE_ADV.textContent = sc.titles.advanced;
+  TITLE_WHS.textContent = sc.titles.whs;
+  TITLE_PRI.textContent = sc.titles.priming;
+
+  famSel.innerHTML='';
+  uniq(byPress(pressSel.value).map(d=>d.family)).sort()
+    .forEach(f=>famSel.add(new Option(f,f)));
+  famSel.value = famSel.options[0]?.value || '';
+  onFamily();
+}
+
+function onFamily(){
+  subSel.innerHTML='';
+  byPressFam(pressSel.value, famSel.value).forEach(d=>subSel.add(new Option(d.name,d.name)));
+  subSel.value = subSel.options[0]?.value || '';
+  renderAll();
+}
+
+function yn(v){const s=String(v).trim().toLowerCase();if(s==='yes')return'<strong style="color:#198754">yes</strong>';if(s==='no'||s==='off')return`<strong style="color:#b02a37">${v}</strong>`;return v}
+
+function renderGroup(tbody, cols, params, q){
+  const rows=[];
+  for(const label of cols){
+    const val = params[label];
+    if(val==null) continue;
+    if(q && !label.toLowerCase().includes(q) && !String(val).toLowerCase().includes(q)) continue;
+    rows.push(`<tr><td>${label}</td><td>${yn(val)}</td></tr>`);
+  }
+  tbody.innerHTML = rows.length ? rows.join('') : `<tr><td colspan="2" class="muted">No items (current filter).</td></tr>`;
+}
+
+function renderAll(){
+  const row=current(); if(!row){TB_ADV.innerHTML=TB_WHS.innerHTML=TB_PRI.innerHTML=''; return;}
+  metaRow.innerHTML = `<span class="pill">Press: <b>${row.press}</b></span>
+                       <span class="pill">Family: <b>${row.family}</b></span>
+                       <span class="pill">Substrate: <b>${row.name}</b></span>`;
+  const schema = SCHEMA[row.press] || SCHEMA["20000/25K"];
+  const q = searchInp.value.trim().toLowerCase();
+  renderGroup(TB_ADV, schema.advanced, row.params, q);
+  renderGroup(TB_WHS,  schema.whs,      row.params, q);
+  renderGroup(TB_PRI,  schema.priming,  row.params, q);
+}
+
+init();
+</script>
+</body>
+</html>
