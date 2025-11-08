@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" href="hp_logo.ico" type="image/x-icon" />
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>HP Indigo – Validated Substrates</title>
@@ -31,12 +32,31 @@
   tbody td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:top}
   tbody tr:hover{background:var(--hover)}
   footer{color:var(--muted);padding:18px;border-top:1px solid var(--line)}
+
+  /* --- Responsive & logo tweaks --- */
+  .brand{display:flex;align-items:center;gap:10px}
+  .hp-logo{width:28px;height:28px;flex:0 0 auto}
+  @media (max-width: 640px){
+    header{padding:12px}
+    h1{font-size:16px}
+  }
+
+  /* Avoid content being cut off inside collapsible groups */
+  .group{overflow:visible}
+
+  /* Make any table region scrollable on small screens */
+  .table-wrap{overflow:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:640px}
+
+  /* Ensure media never overflows */
+  img,svg{max-width:100%;height:auto}
 </style>
+
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>HP Indigo • Validated Substrates & Working Points</h1>
+    <div class="brand"><img class="hp-logo" src="hp_logo.ico" alt="HP" />HP Indigo • Validated Substrates & Working Points</div>
   </div>
 </header>
 
