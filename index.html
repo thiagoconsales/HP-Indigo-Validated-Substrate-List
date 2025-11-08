@@ -34,8 +34,14 @@
   footer{color:var(--muted);padding:18px;border-top:1px solid var(--line)}
 
   /* --- Responsive & logo tweaks --- */
-  .brand{display:flex;align-items:center;gap:10px}
-  .hp-logo{width:28px;height:28px;flex:0 0 auto}
+  .brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:700;
+  font-size:clamp(22px, 2vw + 14px, 28px);
+  line-height:1.25;
+}
   @media (max-width: 640px){
     header{padding:12px}
     h1{font-size:16px}
@@ -50,6 +56,45 @@
 
   /* Ensure media never overflows */
   img,svg{max-width:100%;height:auto}
+
+/* Smooth rounded corners: clip inner backgrounds to the container */
+.card, .group, .section, .box, .panel {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Table wrapper provides its own scroll so content isn't clipped */
+.table-wrap{
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  border-radius: 0; /* let parent control rounding */
+}
+
+/* Keep table rows from bleeding past the edge radius on hover */
+.table-wrap table{
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table-wrap thead th:first-child,
+.table-wrap tbody td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+.table-wrap thead th:last-child,
+.table-wrap tbody td:last-child  { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+
+.brand img.hp-logo{
+  width:36px !important;
+  height:36px !important;
+  flex:0 0 auto;
+  display:block;
+}
+
+
+@media(max-width: 480px){
+  .brand{
+    font-size:clamp(19px, 2vw + 12px, 23px);
+  }
+}
+
 </style>
 
 </head>
@@ -87,27 +132,24 @@
     <details class="group" open id="grp-advanced">
       <summary><span class="group-title" id="title-adv">Advanced properties (Transfer Profile)</span></summary>
       <div class="table-wrap">
-        <table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
-        <tbody id="tbody-adv"></tbody></table>
-      </div>
+<div class="table-wrap"><table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
+        <tbody id="tbody-adv"></tbody></table></div> </div>
     </details>
 
     <!-- WHS -->
     <details class="group" open id="grp-whs">
       <summary><span class="group-title" id="title-whs">Tensions — WHS (Web Handling System)</span></summary>
       <div class="table-wrap">
-        <table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
-        <tbody id="tbody-whs"></tbody></table>
-      </div>
+<div class="table-wrap"><table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
+        <tbody id="tbody-whs"></tbody></table></div> </div>
     </details>
 
     <!-- Priming -->
     <details class="group" open id="grp-priming">
       <summary><span class="group-title" id="title-pri">Priming System Profile</span></summary>
       <div class="table-wrap">
-        <table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
-        <tbody id="tbody-pri"></tbody></table>
-      </div>
+<div class="table-wrap"><table><thead><tr><th style="width:48%">Parameter</th><th>Value</th></tr></thead>
+        <tbody id="tbody-pri"></tbody></table></div> </div>
     </details>
   </div>
 </div>
